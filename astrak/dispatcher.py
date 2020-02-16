@@ -49,6 +49,5 @@ class Dispatcher:
         async for event in self._listen():
             execute, handler = await self._dispatch_new_message(event)
             if execute is not None:
-                message = Message(**event.event.dict())
-                message.api = self.astrak
+                message = Message(api=self.astrak, **event.event.dict())
                 await handler(message)
