@@ -1,0 +1,2 @@
+class AstrakException(Exception):
+    pass
