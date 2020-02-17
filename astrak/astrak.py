@@ -1,11 +1,20 @@
 import aiohttp
 from .types import Me, Dialog, DialogMessage, Event
-from .exceptions import AstrakException
+from .exceptions import AstrakServerException, AstrakException
+import asyncio
 import typing
+import logging
 
 
 class Astrak:
-    def __init__(self, token: str = None, username: str = None, password: str = None):
+    def __init__(
+        self,
+        token: str = None,
+        username: str = None,
+        password: str = None,
+        loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(),
+    ):
+        self.loop = loop
         self.host = "http://afternoon-dusk-97603.herokuapp.com/{}"
         self.session = aiohttp.ClientSession()
         self._token = token
@@ -13,17 +22,18 @@ class Astrak:
         self.password = password
 
     @property
-    async def token(self):
+    async def token(self) -> str:
         if self._token is None:
             self._token = (await self.get_me()).token
         return self._token
 
-    async def _api_request(self, api_method, method="post", **data):
+    async def _api_request(self, api_method, method="post", **data) -> dict:
+        logging.debug(f"Making request on /{api_method} with data - {data}")
         async with self.session.request(
             method=method, url=self.host.format(api_method), data=data
         ) as resp:
             if resp.content_type != "application/json":
-                raise AstrakException(await resp.text())
+                raise AstrakServerException(await resp.text())
             json_resp = await resp.json()
             if json_resp["code"] < 0:
                 raise AstrakException(json_resp["response"])
@@ -36,10 +46,10 @@ class Astrak:
             )
         )
 
-    async def check_token(self, token: str):
+    async def check_token(self, token: str) -> dict:
         return await self._api_request(api_method="users/check", token=token)
 
-    async def send_message(self, text: str, to_id: int):
+    async def send_message(self, text: str, to_id: int) -> dict:
         return await self._api_request(
             api_method="messages/send", token=await self.token, text=text, to=to_id
         )
@@ -68,7 +78,7 @@ class Astrak:
             dialogs.append(Dialog(**dialog))
         return dialogs
 
-    async def get_events(self):
+    async def get_events(self) -> Event:
         event = await self._api_request(
             api_method="events/polling", token=await self.token
         )

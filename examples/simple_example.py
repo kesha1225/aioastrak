@@ -1,7 +1,7 @@
 from astrak import Astrak
 import asyncio
 
-astrak_api = Astrak(username="username", password="username")
+astrak_api = Astrak(username="username", password="password")
 
 
 async def main():
@@ -13,6 +13,7 @@ async def main():
 
     print(dialogs)
 
+    await astrak_api.send_message(text="123", to_id=1)
     await astrak_api.session.close()
 
 
