@@ -12,9 +12,11 @@ class Astrak:
         token: str = None,
         username: str = None,
         password: str = None,
-        loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(),
+        loop: asyncio.AbstractEventLoop = None,
     ):
         self.loop = loop
+        if self.loop is None:
+            self.loop = asyncio.get_event_loop()
         self.host = "http://afternoon-dusk-97603.herokuapp.com/{}"
         self.session = aiohttp.ClientSession()
         self._token = token
