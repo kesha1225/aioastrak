@@ -9,7 +9,7 @@ api
 from astrak import Astrak
 import asyncio
 
-astrak_api = Astrak(username="username", password="username")
+astrak_api = Astrak(username="username", password="password")
 
 
 async def main():
@@ -21,19 +21,22 @@ async def main():
 
     await astrak_api.session.close()
 
+
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
+
 ```
 
 
 bot
 ```python3
-from astrak import Astrak, Dispatcher
+from astrak import Astrak, Dispatcher, TaskManager
 from astrak.types import Message
-import asyncio
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 astrak = Astrak(username="username", password="password")
-
 dp = Dispatcher(astrak)
 
 
@@ -47,8 +50,8 @@ async def text_handler(message: Message):
     await message.answer("ППШ")
 
 
-loop = asyncio.get_event_loop()
-loop.create_task(dp.dispatch_forever())
-loop.run_forever()
+task_manager = TaskManager(astrak.loop)
+task_manager.add_task(dp.dispatch_forever())
+task_manager.run()
 
 ```
