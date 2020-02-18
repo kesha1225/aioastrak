@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class _Message(BaseModel):
+class MessageEvent(BaseModel):
     message_id: int
     to_id: int
     from_id: int

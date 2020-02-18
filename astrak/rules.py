@@ -2,14 +2,14 @@ from abc import ABC, abstractmethod
 
 import typing
 
-from astrak.types import Message
+from astrak.types import MessageEvent
 
 
 class AbstractRule(ABC):
-    title = None
+    title: typing.Optional[str] = None
 
     @abstractmethod
-    async def check(self, message: Message, check_param: typing.Any) -> bool:
+    async def check(self, message: MessageEvent, text: str) -> bool:
         """
         check rule data
         :return:
@@ -19,15 +19,18 @@ class AbstractRule(ABC):
 class TextRule(AbstractRule):
     title = "text"
 
-    async def check(self, message: Message, text: str) -> bool:
+    async def check(self, message: MessageEvent, text: str) -> bool:
         return message.text.lower() == text
 
 
 class TextContainsRule(AbstractRule):
     title = "text_contains"
 
-    async def check(self, message: Message, text: typing.Any) -> bool:
+    async def check(self, message: MessageEvent, text: typing.Any) -> bool:
         return text in [word.lower() for word in message.text.split()]
 
 
-default_rules = {TextRule.title: TextRule, TextContainsRule.title: TextContainsRule}
+default_rules: typing.Dict[str, typing.Type[AbstractRule]] = {
+    TextRule.title: TextRule,
+    TextContainsRule.title: TextContainsRule,
+}

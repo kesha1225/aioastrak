@@ -7,9 +7,9 @@ import logging
 
 
 class Handler:
-    def __init__(self, func: typing.Callable, **rules: typing.List[AbstractRule]):
+    def __init__(self, func: typing.Callable, **rules):
         self.func = func
-        self.rules = rules
+        self.rules: typing.Dict[str, str] = rules
 
     async def __call__(self, message: Message) -> None:
         await self.func(message)
@@ -38,7 +38,7 @@ class Dispatcher:
 
     async def _dispatch_event(self, event: Event) -> None:
         execute, handler = await self._dispatch_new_message(event)
-        if execute:
+        if execute and handler is not None:
             message = Message(api=self.astrak, **event.event.dict())
             return await handler(message)
 
